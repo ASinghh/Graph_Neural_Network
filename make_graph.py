@@ -19,7 +19,7 @@ def build_karate_club_graph():
     u = np.concatenate([src, dst])
     v = np.concatenate([dst, src])
     # Construct a DGLGraph
-    return dgl.DGLGraph((u, v))
+    return dgl.DGLGraph((u,v))
 
 
 G = build_karate_club_graph()
@@ -29,7 +29,7 @@ print('We have %d edges.' % G.number_of_edges())
 
 # Since the actual graph is undirected, we convert it for visualization
 # purpose.
-nx_G = G.to_networkx().to_undirected()
+nx_G = G.to_networkx() #.to_undirected()
 # Kamada-Kawaii layout usually looks pretty for arbitrary graphs
 pos = nx.kamada_kawai_layout(nx_G)
 nx.draw(nx_G, pos, with_labels=True, node_color=[[.7, .7, .7]])
