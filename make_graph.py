@@ -41,7 +41,7 @@ pos = nx.kamada_kawai_layout(nx_G)
 nx.draw(nx_G, pos, with_labels=True, node_color=[[.7, .7, .7]])
 plt.savefig("Graph.png", format="PNG")
 
-embed = nn.Embedding(34, 5)
+embed = nn.Embedding(34, 8)
 G.ndata['feat'] = embed.weight
 
 print(G.ndata['feat'][2])
@@ -63,11 +63,29 @@ class GCN(nn.Module):
 # The first layer transforms input features of size of 5 to a hidden size of 5.
 # The second layer transforms the hidden layer and produces output features of
 # size 2, corresponding to the two groups of the karate club.
-net = GCN(5, 5, 2)
+net = GCN(8, 5, 2)
 
+inputs = embed.weight
+labeled_nodes = torch.tensor([0, 33]) 
+labels = torch.tensor([0, 1])
 
+import itertools
 
+optimizer = torch.optim.Adam(itertools.chain(net.parameters(), embed.parameters()), lr=0.01)
+all_logits = []
+for epoch in range(50):
+    logits = net(G, inputs)
+    # we save the logits for visualization later
+    all_logits.append(logits.detach())
+    logp = F.log_softmax(logits, 1)
+    # we only compute loss for labeled nodes
+    loss = F.nll_loss(logp[labeled_nodes], labels)
 
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
 
 
 
