@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from dgl.nn.pytorch import GraphConv
+
 
 def build_karate_club_graph():
     # All 78 edges are stored in two numpy arrays. One for source endpoints
@@ -45,6 +47,23 @@ G.ndata['feat'] = embed.weight
 print(G.ndata['feat'][2])
 
 print(G.ndata['feat'][[2,11]])
+
+class GCN(nn.Module):
+    def __init__(self, in_feats, hidden_size, num_classes):
+        super(GCN, self).__init__()
+        self.conv1 = GraphConv(in_feats, hidden_size)
+        self.conv2 = GraphConv(hidden_size, num_classes)
+
+    def forward(self, g, inputs):
+        h = self.conv1(g, inputs)
+        h = torch.relu(h)
+        h = self.conv2(g, h)
+        return h
+
+# The first layer transforms input features of size of 5 to a hidden size of 5.
+# The second layer transforms the hidden layer and produces output features of
+# size 2, corresponding to the two groups of the karate club.
+net = GCN(5, 5, 2)
 
 
 
